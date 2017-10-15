@@ -307,4 +307,27 @@ OUT;
             $this->assertContains($searchString, $pageContent);
         }
     }
+
+    public function testSubmitNumericPassword()
+    {
+        $this->getSession()->visit($this->pathTo('/password_form.html'));
+        $page = $this->getSession()->getPage();
+        $webAssert = $this->getAssertSession();
+
+        $password = $webAssert->fieldExists('password');
+
+        $password->setValue('0123');
+
+        $this->assertEquals('0123', $password->getValue());
+
+        $page->pressButton('Submit');
+
+        if ($this->safePageWait(5000, 'document.getElementsByTagName("title") !== null')) {
+            $out = <<<'OUT'
+  password = `0123`,
+OUT;
+            $this->assertContains($out, $page->getContent());
+            $this->assertNotContains('other_field', $page->getContent());
+        }
+    }
 }
